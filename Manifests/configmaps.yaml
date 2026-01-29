@@ -15,6 +15,6 @@ metadata:
   name: auth-service-config
 data:
   PORT: "5001"
-  POSTGRES_URI: "postgresql://postgres:postgres123@47.128.225.20:5432/postgres?sslmode=disable"
+  DBSTRING: "postgresql://postgres:postgres123@47.128.225.20:5432/postgres?sslmode=disable"
   JWT_SECRET: "DeadLock"
   JWT_EXPIRES_IN: "360000"

@@ -52,8 +52,9 @@ jobs:
       - name: Copy manifest files to Kubernetes master node
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ubuntu@${{ secrets.MASTER_IP }} "mkdir -p /home/ubuntu/Manifests"
-          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/configmaps.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/api-gateway-deployment.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/configmaps.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/ingress.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/services.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
 
       - name: Deploy to Kubernetes
