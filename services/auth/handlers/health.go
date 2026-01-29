@@ -21,9 +21,9 @@ func (h *AuthHandler) Health(w http.ResponseWriter, r *http.Request) {
 
 	// Ping the database
 	err := h.db.Ping(ctx)
-	
+
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	if err != nil {
 		// Database is not healthy
 		response := HealthResponse{
