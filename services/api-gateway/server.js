@@ -1,6 +1,6 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const authMiddleware = require('./middleware/authMiddleware');
+// const authMiddleware = require('./middleware/authMiddleware');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -53,7 +53,7 @@ const ordersHealthCheckProxy = createProxyMiddleware({
 app.use('/api/auth', authServiceProxy);
 app.use('/api/inventory', inventoryServiceProxy);
 app.use('/api/orders/health', ordersHealthCheckProxy);
-app.use('/api/orders', authMiddleware, ordersServiceProxy);
+app.use('/api/orders', ordersServiceProxy);
 app.get('/api/health', (req, res) => {
     res.json({ message: "API Gateway is running !!" });
 });
