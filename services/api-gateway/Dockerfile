@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 
-# Environment variables for the service
+# Environment variables for the servic
 ENV PORT=5000
 
 # Expose the port the service will run on
