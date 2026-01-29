@@ -24,3 +24,16 @@ spec:
     - protocol: TCP
       port: 5001
       targetPort: 5001
+---
+# Service for inventory-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+spec:
+  selector:
+    app: inventory-service
+  ports:
+    - protocol: TCP
+      port: 5002
+      targetPort: 5002

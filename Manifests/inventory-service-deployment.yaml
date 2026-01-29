@@ -1,0 +1,24 @@
+---
+# Deployment for inventory-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-service
+  template:
+    metadata:
+      labels:
+        app: inventory-service
+    spec:
+      containers:
+      - name: inventory-service
+        image: asifmahmoud414/bcf26-inventory-service:latest
+        envFrom:
+        - configMapRef:
+            name: inventory-service-config
+        ports:
+        - containerPort: 5002

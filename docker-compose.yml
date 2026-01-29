@@ -25,7 +25,6 @@ services:
     container_name: inventory_service
     environment:
       DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
-      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
       PORT: 5002
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
       CORS_ALLOWED_ORIGIN: http://localhost:3000

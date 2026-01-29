@@ -18,3 +18,16 @@ data:
   DBSTRING: "postgresql://postgres:postgres123@47.128.225.20:5432/postgres?sslmode=disable"
   JWT_SECRET: "DeadLock"
   JWT_EXPIRES_IN: "360000"
+---
+# ConfigMap for inventory-service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: inventory-service-config
+data:
+  PORT: "5002"
+  DBSTRING: "postgresql://postgres:postgres123@47.128.225.20:5432"
+  CORS_ALLOWED_ORIGIN: "*"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
+  LOG_STYLE: "json"
+  LOG_LEVEL: "debug"
