@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/rafidoth/train-ticket-booking-microservice/auth/config"
-	"github.com/rafidoth/train-ticket-booking-microservice/auth/db"
-	"github.com/rafidoth/train-ticket-booking-microservice/auth/handlers"
-	"github.com/rafidoth/train-ticket-booking-microservice/auth/tracing"
+	"github.com/rafidoth/orders-service/config"
+	"github.com/rafidoth/orders-service/db"
+	"github.com/rafidoth/orders-service/handlers"
+	"github.com/rafidoth/orders-service/tracing"
 )
 
 func init() {
@@ -33,14 +33,10 @@ func init() {
 }
 
 func main() {
-	slog.Info("Auth Service Starting", "level", slog.LevelDebug)
+	slog.Info("Orders Service Starting")
 
 	// Initialize tracing
-	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-	if otelEndpoint == "" {
-		otelEndpoint = "otel-collector:4317"
-	}
-	shutdownTracer, err := tracing.InitTracing("auth-service")
+	shutdownTracer, err := tracing.InitTracing("orders-service")
 	if err != nil {
 		slog.Error("failed to initialize tracing", "error", err)
 	}
@@ -48,12 +44,14 @@ func main() {
 
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		slog.Error("problem loading env vars", "error", err)
+		slog.Error("problem loading config", "error", err)
+		os.Exit(1)
 	}
 
 	conn, err := db.NewDatabase(cfg)
 	if err != nil {
-		slog.Error("unable to configure db : ", "error", err)
+		slog.Error("unable to connect to db", "error", err)
+		os.Exit(1)
 	}
 
 	handler := handlers.New(conn)
