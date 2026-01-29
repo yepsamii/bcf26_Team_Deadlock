@@ -1,5 +1,12 @@
 // Overview Tab Content
-function OverviewTab({ user }) {
+function OverviewTab({ user, orders = ORDERS_HISTORY }) {
+    // Calculate statistics
+    const totalOrders = orders.length;
+    const inProgressOrders = orders.filter(o =>
+        ['processing', 'shipped'].includes(o.status)
+    ).length;
+    const completedOrders = orders.filter(o => o.status === 'delivered').length;
+
     return (
         <div className="space-y-6">
             {/* Welcome Section */}
@@ -12,7 +19,7 @@ function OverviewTab({ user }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     title="Total Orders"
-                    value="0"
+                    value={totalOrders.toString()}
                     icon={
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -22,7 +29,7 @@ function OverviewTab({ user }) {
                 />
                 <StatCard
                     title="In Progress"
-                    value="0"
+                    value={inProgressOrders.toString()}
                     icon={
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,7 +39,7 @@ function OverviewTab({ user }) {
                 />
                 <StatCard
                     title="Completed"
-                    value="0"
+                    value={completedOrders.toString()}
                     icon={
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -70,15 +77,35 @@ function OverviewTab({ user }) {
             {/* Recent Activity */}
             <div className="bg-white rounded-xl card-shadow p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-                <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
+                {orders.length === 0 ? (
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                        </div>
+                        <p className="text-gray-500 text-sm">No recent activity</p>
+                        <p className="text-gray-400 text-xs mt-1">Your order history will appear here</p>
                     </div>
-                    <p className="text-gray-500 text-sm">No recent activity</p>
-                    <p className="text-gray-400 text-xs mt-1">Your order history will appear here</p>
-                </div>
+                ) : (
+                    <div className="space-y-3">
+                        {orders.slice(0, 5).map(order => (
+                            <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <StatusBadge status={order.status} />
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-900">{order.id}</p>
+                                        <p className="text-xs text-gray-500">{formatOrderDate(order.date)}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-sm font-semibold text-gray-900">${order.total.toFixed(2)}</p>
+                                    <p className="text-xs text-gray-500">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

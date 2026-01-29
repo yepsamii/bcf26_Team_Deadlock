@@ -1,5 +1,5 @@
 // Service Health Card Component
-function ServiceHealthCard({ service, data }) {
+function ServiceHealthCard({ data }) {
     const statusConfig = {
         healthy: {
             label: 'Healthy',

@@ -1,5 +1,5 @@
 // Orders Tab Component
-function OrdersTab({ user }) {
+function OrdersTab({ user, products = PRODUCTS_INVENTORY, orders = ORDERS_HISTORY }) {
     const { useState } = React;
 
     const [activeSubTab, setActiveSubTab] = useState('create');
@@ -8,10 +8,10 @@ function OrdersTab({ user }) {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Get unique categories
-    const categories = ['all', ...new Set(PRODUCTS_INVENTORY.map(p => p.category))];
+    const categories = ['all', ...new Set(products.map(p => p.category))];
 
     // Filter products
-    const filteredProducts = PRODUCTS_INVENTORY.filter(product => {
+    const filteredProducts = products.filter(product => {
         const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             product.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -39,7 +39,7 @@ function OrdersTab({ user }) {
 
     // Update quantity
     const updateQuantity = (productId, newQuantity) => {
-        const product = PRODUCTS_INVENTORY.find(p => p.id === productId);
+        const product = products.find(p => p.id === productId);
         if (newQuantity <= 0) {
             removeFromCart(productId);
         } else if (newQuantity <= product.stock) {
@@ -105,7 +105,7 @@ function OrdersTab({ user }) {
                     placeOrder={placeOrder}
                 />
             ) : (
-                <OrderHistoryView />
+                <OrderHistoryView orders={orders} />
             )}
         </div>
     );

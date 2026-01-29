@@ -69,6 +69,9 @@
     <!-- Data -->
     <script type="text/babel" src="./data/metrics.js"></script>
 
+    <!-- Utilities -->
+    <script type="text/babel" src="./utils/simulation.js"></script>
+
     <!-- Components -->
     <script type="text/babel" src="./components/ServiceHealthCard.js"></script>
     <script type="text/babel" src="./components/ResponseTimeIndicator.js"></script>
@@ -83,19 +86,100 @@
         function MonitoringDashboard() {
             const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleTimeString());
             const [rollingAverage, setRollingAverage] = useState({ orderService: 0, inventoryService: 0 });
+            const [servicesStatus, setServicesStatus] = useState(SERVICES_STATUS);
+            const [responseTimeHistory, setResponseTimeHistory] = useState(RESPONSE_TIME_HISTORY);
+            const [activityLog, setActivityLog] = useState(ACTIVITY_LOG);
+            const [failureStats, setFailureStats] = useState(FAILURE_STATS.last24Hours);
 
-            // Auto-refresh and calculate rolling average
+            // Update response time data every 2 seconds
             useEffect(() => {
-                // Initial calculation
-                setRollingAverage(calculateRollingAverage(RESPONSE_TIME_HISTORY));
-
-                // Update every 5 seconds
                 const interval = setInterval(() => {
+                    setResponseTimeHistory(prevHistory => {
+                        // Generate new response times
+                        const newOrderTime = generateResponseTime(145, 0.05);
+                        const newInventoryTime = generateResponseTime(180, 0.15); // Higher spike chance
+
+                        const newDataPoint = {
+                            timestamp: Date.now(),
+                            orderService: newOrderTime,
+                            inventoryService: newInventoryTime
+                        };
+
+                        // Keep only last 30 data points
+                        const updatedHistory = [...prevHistory.slice(1), newDataPoint];
+
+                        // Calculate new rolling average
+                        setRollingAverage(calculateRollingAverage(updatedHistory));
+
+                        return updatedHistory;
+                    });
+
                     setLastUpdate(new Date().toLocaleTimeString());
-                    setRollingAverage(calculateRollingAverage(RESPONSE_TIME_HISTORY));
+                }, 2000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            // Update service status every 10 seconds
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setServicesStatus(prevStatus => {
+                        const newStatus = { ...prevStatus };
+
+                        // Simulate status changes for each service
+                        Object.keys(newStatus).forEach(serviceKey => {
+                            const service = newStatus[serviceKey];
+                            service.status = simulateServiceStatus(service.status, service.uptime);
+                            service.lastCheck = new Date().toISOString();
+
+                            // Update response time based on status
+                            if (service.status === 'healthy') {
+                                if (serviceKey === 'orderService') {
+                                    service.responseTime = generateResponseTime(145, 0.05);
+                                } else if (serviceKey === 'inventoryService') {
+                                    service.responseTime = generateResponseTime(180, 0.1);
+                                } else {
+                                    service.responseTime = generateResponseTime(8, 0);
+                                }
+                            } else if (service.status === 'degraded') {
+                                service.responseTime = Math.floor(Math.random() * 1500) + 1000;
+                            } else {
+                                service.responseTime = 0;
+                            }
+                        });
+
+                        return newStatus;
+                    });
+                }, 10000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            // Add new activity log entries every 15 seconds
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setActivityLog(prevLog => {
+                        const newEntry = generateActivityLogEntry(servicesStatus);
+                        // Keep only last 20 entries
+                        return [newEntry, ...prevLog.slice(0, 19)];
+                    });
+                }, 15000);
+
+                return () => clearInterval(interval);
+            }, [servicesStatus]);
+
+            // Update failure statistics every 5 seconds
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setFailureStats(prevStats => updateFailureStats(prevStats));
                 }, 5000);
 
                 return () => clearInterval(interval);
+            }, []);
+
+            // Initial calculation
+            useEffect(() => {
+                setRollingAverage(calculateRollingAverage(responseTimeHistory));
             }, []);
 
             return (
@@ -134,9 +218,9 @@
                         <div className="mb-8">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Health</h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <ServiceHealthCard data={SERVICES_STATUS.orderService} />
-                                <ServiceHealthCard data={SERVICES_STATUS.inventoryService} />
-                                <ServiceHealthCard data={SERVICES_STATUS.database} />
+                                <ServiceHealthCard data={servicesStatus.orderService} />
+                                <ServiceHealthCard data={servicesStatus.inventoryService} />
+                                <ServiceHealthCard data={servicesStatus.database} />
                             </div>
                         </div>
 
@@ -161,12 +245,12 @@
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Failure Stats */}
                             <div className="lg:col-span-1">
-                                <FailureStats stats={FAILURE_STATS.last24Hours} />
+                                <FailureStats stats={failureStats} />
                             </div>
 
                             {/* Activity Log */}
                             <div className="lg:col-span-2">
-                                <ActivityLog activities={ACTIVITY_LOG} maxItems={8} />
+                                <ActivityLog activities={activityLog} maxItems={8} />
                             </div>
                         </div>
                     </main>

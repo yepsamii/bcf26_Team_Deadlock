@@ -1,9 +1,43 @@
 // Dashboard View Component
 function DashboardView({ user, onLogout }) {
-    const { useState } = React;
+    const { useState, useEffect } = React;
 
     const [currentTab, setCurrentTab] = useState('overview');
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [products, setProducts] = useState(PRODUCTS_INVENTORY);
+    const [orders, setOrders] = useState(ORDERS_HISTORY);
+
+    // Simulate order status updates every 20 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setOrders(prevOrders =>
+                prevOrders.map(order => updateOrderStatus(order))
+            );
+        }, 20000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Simulate product stock updates every 30 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setProducts(prevProducts => updateProductStock(prevProducts));
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Randomly generate new orders (low frequency)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (Math.random() < 0.3) { // 30% chance
+                const newOrder = generateNewOrder(user.id, products);
+                setOrders(prevOrders => [newOrder, ...prevOrders]);
+            }
+        }, 45000); // Every 45 seconds
+
+        return () => clearInterval(interval);
+    }, [user.id, products]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -156,8 +190,8 @@ function DashboardView({ user, onLogout }) {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {currentTab === 'overview' && <OverviewTab user={user} />}
-                {currentTab === 'orders' && <OrdersTab user={user} />}
+                {currentTab === 'overview' && <OverviewTab user={user} orders={orders} />}
+                {currentTab === 'orders' && <OrdersTab user={user} products={products} orders={orders} />}
                 {currentTab === 'profile' && <ProfileTab user={user} />}
             </main>
         </div>

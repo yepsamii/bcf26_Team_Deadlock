@@ -1,5 +1,5 @@
 // Order History View Component
-function OrderHistoryView() {
+function OrderHistoryView({ orders = ORDERS_HISTORY }) {
     const { useState } = React;
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -8,7 +8,7 @@ function OrderHistoryView() {
 
     // Get filtered and sorted orders
     const getFilteredOrders = () => {
-        let filtered = [...ORDERS_HISTORY];
+        let filtered = [...orders];
 
         // Apply search filter
         if (searchQuery) {
@@ -46,13 +46,13 @@ function OrderHistoryView() {
 
     // Get status counts
     const statusCounts = {
-        all: ORDERS_HISTORY.length,
-        delivered: ORDERS_HISTORY.filter(o => o.status === 'delivered').length,
-        shipped: ORDERS_HISTORY.filter(o => o.status === 'shipped').length,
-        processing: ORDERS_HISTORY.filter(o => o.status === 'processing').length,
-        timeout: ORDERS_HISTORY.filter(o => o.status === 'timeout').length,
-        error: ORDERS_HISTORY.filter(o => o.status === 'error').length,
-        cancelled: ORDERS_HISTORY.filter(o => o.status === 'cancelled').length,
+        all: orders.length,
+        delivered: orders.filter(o => o.status === 'delivered').length,
+        shipped: orders.filter(o => o.status === 'shipped').length,
+        processing: orders.filter(o => o.status === 'processing').length,
+        timeout: orders.filter(o => o.status === 'timeout').length,
+        error: orders.filter(o => o.status === 'error').length,
+        cancelled: orders.filter(o => o.status === 'cancelled').length,
     };
 
     return (
