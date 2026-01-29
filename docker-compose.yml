@@ -5,7 +5,7 @@ services:
     build: ./services/auth
     container_name: auth_service
     environment:
-      DBSTRING: postgresql://neondb_owner:npg_LIUP06FvYnCz@ep-icy-thunder-ah99dei0-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
       DBNAME: neondb
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
       PORT: 5001 
@@ -14,6 +14,11 @@ services:
       - "5001:5001"
     depends_on:
       - otel-collector
+      - prometheus
+      - loki
+    networks:
+      - deadlock-network
+
 
 
   api-gateway:
@@ -26,10 +31,14 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:5001
     depends_on:
       - auth-service
+      - prometheus
+      - loki
     ports:
       - "5000:5000"
     volumes:
       - ./services/api-gateway:/app
+    networks:
+      - deadlock-network
 
 
 
