@@ -38,7 +38,7 @@ func (h *AuthHandler) Health(w http.ResponseWriter, r *http.Request) {
 
 	// Everything is healthy
 	response := HealthResponse{
-		Status:   "healthy!",
+		Status:   "healthy",
 		Database: "connected",
 		Message:  "Service is running properly",
 	}
