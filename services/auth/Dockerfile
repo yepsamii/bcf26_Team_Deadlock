@@ -1,5 +1,5 @@
 # Use the official Golang image as the base
-FROM golang:1.25.6-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Set environment variables
 ENV CGO_ENABLED=0 \
@@ -18,7 +18,6 @@ RUN go mod download
 # Copy the entire application source
 COPY . .
 
-
 # Build the Go binary
 RUN go build -o /app .
 
@@ -28,6 +27,5 @@ FROM alpine:3.21 AS final
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app /bin/app
 
-
 # Run the application
-CMD ["bin/app"]
+CMD ["/bin/app"]

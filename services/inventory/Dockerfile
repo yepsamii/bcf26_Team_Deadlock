@@ -1,5 +1,5 @@
 # Use the official Golang image as the base
-FROM golang:1.25.6-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # Set environment variables
 ENV CGO_ENABLED=0 \
@@ -28,4 +28,4 @@ COPY --from=builder /app /bin/app
 
 
 # Run the application
-CMD ["bin/app"]
+CMD ["/bin/app"]
