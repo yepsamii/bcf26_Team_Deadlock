@@ -87,12 +87,6 @@ export const ProductCard = ({ product }) => {
               {product.available_quantity} units
             </span>
           </div>
-          {product.reserved > 0 && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Reserved:</span>
-              <span className="font-medium text-gray-500">{product.reserved} units</span>
-            </div>
-          )}
         </div>
 
         {/* Add to Cart */}

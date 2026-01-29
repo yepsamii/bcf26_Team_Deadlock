@@ -21,7 +21,6 @@ COPY . .
 # Build the Go binary
 RUN go build -o /app .
 
-# Final lightweight stage
 FROM alpine:3.21 AS final
 
 # Copy the compiled binary from the builder stage
