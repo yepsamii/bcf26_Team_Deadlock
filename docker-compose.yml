@@ -6,7 +6,6 @@ services:
     container_name: auth_service
     environment:
       DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
-      DBNAME: neondb
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
       PORT: 5001 
       OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
