@@ -4,14 +4,19 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rafidoth/orders-service/clients"
 )
 
 type OrdersHandler struct {
-	db *pgxpool.Pool
+	db              *pgxpool.Pool
+	inventoryClient *clients.InventoryClient
 }
 
-func New(conn *pgxpool.Pool) *OrdersHandler {
-	return &OrdersHandler{db: conn}
+func New(conn *pgxpool.Pool, inventoryClient *clients.InventoryClient) *OrdersHandler {
+	return &OrdersHandler{
+		db:              conn,
+		inventoryClient: inventoryClient,
+	}
 }
 
 type Order struct {
