@@ -33,9 +33,10 @@ services:
       - prometheus
       - loki
     ports:
-      - "5000:5000"
+      - "8000:5000"
     volumes:
       - ./services/api-gateway:/app
+      - /app/node_modules
     networks:
       - deadlock-network
 
