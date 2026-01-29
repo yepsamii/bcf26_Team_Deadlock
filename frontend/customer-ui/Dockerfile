@@ -2,8 +2,8 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
-COPY package.json package-lock.json ./
+# Copy package.json (and package-lock.json if it exists) to the working directory
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
