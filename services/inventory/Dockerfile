@@ -9,7 +9,7 @@ ENV CGO_ENABLED=0 \
 # Set working directory inside the container
 WORKDIR /build
 
-# Copy go.mod and go.sum files for dependency installation
+# Copy go.mod and go.sum files for dependency installatio
 COPY go.mod go.sum ./
 
 # Download dependencies
