@@ -20,6 +20,23 @@ services:
 
 
 
+  inventory-service:
+    build: ./services/inventory
+    container_name: inventory_service
+    environment:
+      DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672/
+      PORT: 5002
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
+    ports:
+      - "5002:5002"
+    depends_on:
+      - otel-collector
+      - prometheus
+      - loki
+    networks:
+      - deadlock-network
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -28,8 +45,10 @@ services:
     environment:
       - PORT=5000
       - AUTH_SERVICE_URL=http://auth-service:5001
+      - INVENTORY_SERVICE_URL=http://inventory-service:5002
     depends_on:
       - auth-service
+      - inventory-service
       - prometheus
       - loki
     ports:
