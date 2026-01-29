@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valerix - Customer Portal</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .card-shadow {
+                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            }
+            .card-shadow-lg {
+                box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+    <div id="root"></div>
+
+    <!-- React & ReactDOM CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Main App -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Main App Component
+        function App() {
+            const [currentView, setCurrentView] = useState('auth'); // 'auth' or 'dashboard'
+            const [user, setUser] = useState(null);
+
+            // Check if user is logged in (from localStorage)
+            useEffect(() => {
+                const savedUser = localStorage.getItem('valerix_user');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                    setCurrentView('dashboard');
+                }
+            }, []);
+
+            const handleLogin = (userData) => {
+                setUser(userData);
+                localStorage.setItem('valerix_user', JSON.stringify(userData));
+                setCurrentView('dashboard');
+            };
+
+            const handleLogout = () => {
+                setUser(null);
+                localStorage.removeItem('valerix_user');
+                setCurrentView('auth');
+            };
+
+            return (
+                <div className="min-h-screen">
+                    {currentView === 'auth' ? (
+                        <AuthView onLogin={handleLogin} />
+                    ) : (
+                        <DashboardView user={user} onLogout={handleLogout} />
+                    )}
+                </div>
+            );
+        }
+
+        // Placeholder Auth View Component
+        function AuthView({ onLogin }) {
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
+                    <div className="bg-white p-8 rounded-lg card-shadow-lg max-w-md w-full">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Valerix</h1>
+                        <p className="text-gray-600 mb-8">Customer Portal - Auth Coming Soon</p>
+
+                        {/* Temporary login button */}
+                        <button
+                            onClick={() => onLogin({ name: 'Demo User', email: 'demo@valerix.com' })}
+                            className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                        >
+                            Demo Login
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Placeholder Dashboard View Component
+        function DashboardView({ user, onLogout }) {
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <nav className="bg-white border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center">
+                                    <h1 className="text-xl font-bold text-gray-900">Valerix</h1>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-sm text-gray-700">{user?.email}</span>
+                                    <button
+                                        onClick={onLogout}
+                                        className="text-sm text-gray-600 hover:text-gray-900"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="bg-white rounded-lg card-shadow p-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome, {user?.name}!</h2>
+                            <p className="text-gray-600">Dashboard coming soon...</p>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        // Render App
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
