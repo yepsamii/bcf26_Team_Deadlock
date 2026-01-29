@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rafidoth/train-ticket-booking-microservice/inventory/config"
 	"github.com/rafidoth/train-ticket-booking-microservice/inventory/handlers"
@@ -28,6 +29,16 @@ func NewServer(inventoryHandler *handlers.InventoryHandler, cfg *config.Config) 
 }
 
 func (s *Server) registerRoutes() {
+	// Apply CORS middleware
+	s.router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{s.cfg.CorsAllowed},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	// Apply OpenTelemetry middleware for distributed tracing
 	s.router.Use(otelchi.Middleware("inventory-service", otelchi.WithChiRoutes(s.router)))
 
