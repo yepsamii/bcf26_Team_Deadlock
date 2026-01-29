@@ -40,10 +40,19 @@ const ordersServiceProxy = createProxyMiddleware({
     }
 });
 
+// Health check proxy
+const ordersHealthCheckProxy = createProxyMiddleware({
+    target: ORDER_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {
+        '^/api/orders/health': '/health'
+    }
+});
 
 // Routes
 app.use('/api/auth', authServiceProxy);
 app.use('/api/inventory', inventoryServiceProxy);
+app.use('/api/orders/health', ordersHealthCheckProxy);
 app.use('/api/orders', authMiddleware, ordersServiceProxy);
 app.get('/api/health', (req, res) => {
     res.json({ message: "API Gateway is running !!" });
