@@ -1,0 +1,21 @@
+{
+  "name": "valerix-frontend",
+  "version": "1.0.0",
+  "description": "Valerix Frontend - Customer Portal and Monitoring Dashboard",
+  "scripts": {
+    "start": "node start-all.js",
+    "customer": "npx http-server customer-ui -p 3000 -c-1 --cors",
+    "dashboard": "npx http-server dashboard -p 3001 -c-1 --cors",
+    "dev": "npm-run-all --parallel customer dashboard"
+  },
+  "keywords": [
+    "valerix",
+    "microservices",
+    "monitoring"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
