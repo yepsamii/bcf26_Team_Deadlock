@@ -53,7 +53,7 @@ func InitTracing(serviceName string) (func(), error) {
 }
 
 func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
-	tracer := otel.Tracer("user-service")
+	tracer := otel.Tracer("orders-service")
 	return tracer.Start(ctx, name)
 }
 

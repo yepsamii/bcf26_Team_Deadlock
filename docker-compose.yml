@@ -19,6 +19,21 @@ services:
       - deadlock-network
 
 
+  orders-service:
+    build: ./services/orders
+    container_name: orders-service
+    environment:
+      PORT: 5003
+      DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
+    ports:
+      - "5003:5003"
+    depends_on:
+      - otel-collector
+      - prometheus
+      - loki
+    networks:
+      - deadlock-network
+
 
   inventory-service:
     build: ./services/inventory

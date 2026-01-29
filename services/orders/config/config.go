@@ -7,17 +7,8 @@ import (
 )
 
 type Config struct {
-	Logs        LogConfig
-	DB          PostgresConfig
-	Port        string
-	CorsAllowed string
-	RabbitMqURL string
-	JWTSecret   string
-}
-
-type LogConfig struct {
-	Style string
-	Level string
+	DB   PostgresConfig
+	Port string
 }
 
 type PostgresConfig struct {
@@ -25,26 +16,10 @@ type PostgresConfig struct {
 }
 
 func LoadConfig() (*Config, error) {
-	dbString := os.Getenv("DBSTRING")
-	if dbString == "" {
-	}
-	// rabbitMqURL := os.Getenv("RABBITMQ_URL")
-	// if rabbitMqURL == "" {
-	// 	slog.Info("DBSTRING not set")
-	// }
-
-	cfg := &Config{
+	return &Config{
 		Port: os.Getenv("PORT"),
-		Logs: LogConfig{
-			Style: os.Getenv("LOG_STYLE"),
-			Level: os.Getenv("LOG_LEVEL"),
-		},
 		DB: PostgresConfig{
-			DBString: dbString,
+			DBString: os.Getenv("DBSTRING"),
 		},
-		CorsAllowed: os.Getenv("CORS_ALLOWED_ORIGIN"),
-		// RabbitMqURL: rabbitMqURL,
-	}
-
-	return cfg, nil
+	}, nil
 }
