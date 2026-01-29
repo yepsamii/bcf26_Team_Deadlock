@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-config
+  namespace: monitoring
+data:
+  # Prometheus config
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: 'auth-service'
+        static_configs:
+          - targets: ['auth-service.default:5001']
+        metrics_path: /metrics
+      - job_name: 'inventory-service'
+        static_configs:
+          - targets: ['inventory-service.default:5002']
+        metrics_path: /metrics
+
+  # Loki config
+  loki.yaml: |
+    auth_enabled: false
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+    common:
+      instance_addr: 127.0.0.1
+      path_prefix: /tmp/loki
+      storage:
+        filesystem:
+          chunks_directory: /tmp/loki/chunks
+          rules_directory: /tmp/loki/rules
+      replication_factor: 1
+      ring:
+        kvstore:
+          store: inmemory
+    query_range:
+      results_cache:
+        cache:
+          embedded_cache:
+            enabled: true
+            max_size_mb: 100
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: index_
+            period: 24h
+    limits_config:
+      retention_period: 24h
+
+  # Promtail config
+  promtail.yaml: |
+    server:
+      http_listen_port: 9080
+    positions:
+      filename: /tmp/positions.yaml
+    clients:
+      - url: http://loki.monitoring:3100/loki/api/v1/push
+    scrape_configs:
+      - job_name: containerlogs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: containerlogs
+              __path__: /var/lib/docker/containers/*/*log
+
+  # Grafana datasources
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+      - name: Jaeger
+        type: jaeger
+        access: proxy
+        url: http://jaeger:16686
+
+  # Grafana dashboard provider
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        options:
+          path: /var/lib/grafana/dashboards
+
+  # RED Metrics Dashboard
+  red-metrics.json: |
+    {"annotations":{"list":[]},"editable":true,"panels":[{"datasource":{"type":"prometheus","uid":"${DS_PROMETHEUS}"},"fieldConfig":{"defaults":{"unit":"reqps"}},"gridPos":{"h":8,"w":12,"x":0,"y":0},"id":1,"targets":[{"expr":"sum(rate(http_requests_total[1m])) by (service)","legendFormat":"{{service}}"}],"title":"Request Rate","type":"timeseries"},{"datasource":{"type":"prometheus","uid":"${DS_PROMETHEUS}"},"fieldConfig":{"defaults":{"unit":"percentunit"}},"gridPos":{"h":8,"w":12,"x":12,"y":0},"id":2,"targets":[{"expr":"sum(rate(http_requests_total{status_code=~\"5..\"}[1m])) by (service) / sum(rate(http_requests_total[1m])) by (service)","legendFormat":"{{service}}"}],"title":"Error Rate (5xx)","type":"timeseries"},{"datasource":{"type":"prometheus","uid":"${DS_PROMETHEUS}"},"fieldConfig":{"defaults":{"unit":"s"}},"gridPos":{"h":8,"w":24,"x":0,"y":8},"id":3,"targets":[{"expr":"histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service))","legendFormat":"{{service}} p50"},{"expr":"histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, service))","legendFormat":"{{service}} p99"}],"title":"Request Duration","type":"timeseries"}],"refresh":"5s","schemaVersion":38,"templating":{"list":[{"name":"DS_PROMETHEUS","query":"prometheus","type":"datasource"}]},"time":{"from":"now-15m","to":"now"},"title":"RED Metrics","uid":"red-metrics"}
+
+  # Logs Dashboard
+  logs-dashboard.json: |
+    {"annotations":{"list":[]},"editable":true,"panels":[{"datasource":{"type":"loki","uid":"${DS_LOKI}"},"gridPos":{"h":6,"w":24,"x":0,"y":0},"id":1,"targets":[{"expr":"sum(count_over_time({job=\"containerlogs\"} [1m]))","legendFormat":"logs/min"}],"title":"Log Volume","type":"timeseries"},{"datasource":{"type":"loki","uid":"${DS_LOKI}"},"gridPos":{"h":18,"w":24,"x":0,"y":6},"id":2,"options":{"showTime":true,"sortOrder":"Descending","wrapLogMessage":true},"targets":[{"expr":"{job=\"containerlogs\"}"}],"title":"Logs","type":"logs"}],"refresh":"5s","schemaVersion":38,"templating":{"list":[{"name":"DS_LOKI","query":"loki","type":"datasource"}]},"time":{"from":"now-15m","to":"now"},"title":"Logs Dashboard","uid":"logs-dashboard"}

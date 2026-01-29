@@ -4,6 +4,8 @@
 deploy:
 	@echo "Creating monitoring namespace..."
 	kubectl apply -f namespace.yaml
+	@echo "Creating ConfigMap..."
+	kubectl apply -f configmap.yaml
 	@echo "Deploying Prometheus..."
 	kubectl apply -f prometheus.yaml
 	@echo "Deploying Grafana..."
@@ -27,6 +29,7 @@ delete:
 	kubectl delete -f loki.yaml --ignore-not-found
 	kubectl delete -f grafana.yaml --ignore-not-found
 	kubectl delete -f prometheus.yaml --ignore-not-found
+	kubectl delete -f configmap.yaml --ignore-not-found
 	kubectl delete -f namespace.yaml --ignore-not-found
 	@echo "✓ Monitoring stack deleted!"
 
