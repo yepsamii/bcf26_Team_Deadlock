@@ -9,13 +9,11 @@ window.DASHBOARD_CONFIG = {
     USE_MOCK_DATA: false,
 
     // Service endpoints (used when USE_MOCK_DATA is false)
-    // In Docker: nginx will proxy /api/* to the actual services
-    // Locally: you can override these to point to localhost:PORT
+    // Routes use /api/* prefix as configured in API Gateway
     ENDPOINTS: {
-        AUTH: API_BASE_URL + '/auth',
-        INVENTORY: API_BASE_URL + '/inventory',
-        ORDERS: API_BASE_URL + '/orders',
-        GATEWAY: API_BASE_URL + '/gateway'
+        AUTH: API_BASE_URL + '/api/auth',
+        INVENTORY: API_BASE_URL + '/api/inventory',
+        ORDERS: API_BASE_URL + '/api/orders',
     },
 
     // Health check settings
