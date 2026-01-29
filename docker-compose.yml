@@ -25,9 +25,15 @@ services:
     environment:
       PORT: 5003
       DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
+      INVENTORY_SERVICE_URL: http://inventory-service:5002
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4317
+      RESILIENCE_TIMEOUT_SECONDS: 3
+      CIRCUIT_MAX_FAILURES: 5
+      CIRCUIT_TIMEOUT_SECONDS: 30
     ports:
       - "5003:5003"
     depends_on:
+      - inventory-service
       - otel-collector
       - prometheus
       - loki
