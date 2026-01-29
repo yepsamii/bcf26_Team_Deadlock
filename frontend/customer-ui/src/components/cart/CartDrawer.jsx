@@ -1,29 +1,97 @@
 import { useCart } from '../../contexts/CartContext';
 import { CartItem } from './CartItem';
 import { useReserveProduct } from '../../hooks/useInventory';
+import { useCreateOrder } from '../../hooks/useOrders';
 import { useState } from 'react';
 
 export const CartDrawer = () => {
-  const { cartItems, isCartOpen, setIsCartOpen, getCartTotal, clearCart } = useCart();
+  const { cartItems, isCartOpen, setIsCartOpen, getCartTotal, clearCart, removeFromCart } = useCart();
   const reserveProductMutation = useReserveProduct();
+  const createOrderMutation = useCreateOrder();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
 
     setIsCheckingOut(true);
+
+    const results = {
+      successful: [],
+      failed: [],
+    };
+
     try {
+      // Process each cart item sequentially
       for (const item of cartItems) {
-        await reserveProductMutation.mutateAsync({
-          productId: item.id,
-          quantity: item.quantity,
+        try {
+          // Step 1: Create order
+          const orderResponse = await createOrderMutation.mutateAsync({
+            productId: item.id,
+            quantity: item.quantity,
+          });
+
+          // Step 2: Reserve inventory (if order creation succeeds)
+          try {
+            await reserveProductMutation.mutateAsync({
+              productId: item.id,
+              quantity: item.quantity,
+            });
+
+            // Both operations succeeded
+            results.successful.push({
+              productId: item.id,
+              productTitle: item.title,
+              orderId: orderResponse.order.id,
+            });
+          } catch (inventoryError) {
+            // Order created but inventory reservation failed
+            console.error('Inventory reservation failed:', inventoryError);
+            results.failed.push({
+              productId: item.id,
+              productTitle: item.title,
+              error: inventoryError.message || 'Failed to reserve inventory',
+              orderCreated: true,
+              orderId: orderResponse.order.id,
+            });
+          }
+        } catch (orderError) {
+          // Order creation failed
+          console.error('Order creation failed:', orderError);
+          results.failed.push({
+            productId: item.id,
+            productTitle: item.title,
+            error: orderError.message || 'Failed to create order',
+            orderCreated: false,
+          });
+        }
+      }
+
+      // Handle results
+      if (results.successful.length > 0) {
+        // Remove successful items from cart
+        results.successful.forEach((result) => {
+          removeFromCart(result.productId);
         });
       }
-      clearCart();
-      alert('Order placed successfully!');
+
+      // Show user feedback
+      if (results.failed.length === 0) {
+        // All succeeded
+        alert(`Order placed successfully! ${results.successful.length} item(s) ordered.`);
+      } else if (results.successful.length > 0) {
+        // Partial success
+        alert(
+          `${results.successful.length} item(s) ordered successfully.\n` +
+          `${results.failed.length} item(s) failed:\n` +
+          results.failed.map((f) => `- ${f.productTitle}: ${f.error}`).join('\n')
+        );
+      } else {
+        // All failed
+        alert('Failed to complete order. Please try again.');
+      }
     } catch (error) {
       console.error('Checkout failed:', error);
-      alert('Failed to complete order. Some items may be out of stock.');
+      alert('An unexpected error occurred. Please try again.');
     } finally {
       setIsCheckingOut(false);
     }

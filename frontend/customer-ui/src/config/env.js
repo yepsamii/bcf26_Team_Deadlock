@@ -7,9 +7,9 @@
 
 export const config = {
   // API URLs
-  authServiceURL: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8000',
-  orderServiceURL: import.meta.env.VITE_ORDER_SERVICE_URL || 'http://localhost:8000',
-  inventoryServiceURL: import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:8000',
+  authServiceURL: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://13.212.182.34/api/auth',
+  orderServiceURL: import.meta.env.VITE_ORDER_SERVICE_URL || 'http://13.212.182.34/api/orders',
+  inventoryServiceURL: import.meta.env.VITE_INVENTORY_SERVICE_URL ||'http://13.212.182.34/api/inventory',
 
   // Feature Flags
   useMockData: import.meta.env.VITE_USE_MOCK_DATA === 'true',
