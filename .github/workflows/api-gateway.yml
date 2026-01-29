@@ -6,11 +6,6 @@ on:
       - ci/cd
     paths:
       - services/api-gateway/**
-  pull_request:
-    branches:
-      - main
-    paths:
-      - services/api-gateway/**
 
 jobs:
   build-and-deploy:
