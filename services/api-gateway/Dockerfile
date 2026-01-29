@@ -11,6 +11,7 @@ RUN npm install
 # Copy the rest of the app
 COPY . .
 
+
 # Environment variables for the service
 ENV PORT=5000
 
