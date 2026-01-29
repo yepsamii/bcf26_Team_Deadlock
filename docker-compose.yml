@@ -89,6 +89,22 @@ services:
     networks:
       - deadlock-network
 
+  monitoring-dashboard:
+    build:
+      context: ./frontend/dashboard
+      dockerfile: Dockerfile
+    container_name: monitoring-dashboard
+    depends_on:
+      - auth-service
+      - inventory-service
+      - orders-service
+      - api-gateway
+      - prometheus
+    ports:
+      - "3001:80"
+    networks:
+      - deadlock-network
+
 
 
   # Monitoring Services

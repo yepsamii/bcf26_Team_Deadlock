@@ -6,14 +6,16 @@
  */
 
 // API Configuration
+// Configuration is loaded from config.js (window.DASHBOARD_CONFIG)
+// Fallback to defaults if not available
 const MONITORING_CONFIG = {
-    ORDER_SERVICE_URL: 'http://localhost:5003',
-    INVENTORY_SERVICE_URL: 'http://localhost:5002',
-    AUTH_SERVICE_URL: 'http://localhost:5001',
-    API_GATEWAY_URL: 'http://localhost:5000',
-    DATABASE_URL: 'postgresql://postgres:postgres123@47.128.225.20:5432/postgres',
-    USE_MOCK_DATA: true, // Set to false to use real service health checks
-    HEALTH_CHECK_TIMEOUT: 3000, // 3 seconds
+    ORDER_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.ORDERS || window.location.origin + '/api/orders',
+    INVENTORY_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.INVENTORY || window.location.origin + '/api/inventory',
+    AUTH_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.AUTH || window.location.origin + '/api/auth',
+    API_GATEWAY_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.GATEWAY || window.location.origin + '/api/gateway',
+    DATABASE_URL: window.DASHBOARD_CONFIG?.DATABASE_URL || 'postgresql://postgres:postgres123@47.128.225.20:5432/postgres',
+    USE_MOCK_DATA: window.DASHBOARD_CONFIG?.USE_MOCK_DATA ?? true,
+    HEALTH_CHECK_TIMEOUT: window.DASHBOARD_CONFIG?.HEALTH_CHECK_TIMEOUT || 3000,
 };
 
 class HealthService {

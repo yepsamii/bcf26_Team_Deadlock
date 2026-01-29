@@ -66,14 +66,14 @@
     <!-- Babel Standalone for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- Configuration -->
+    <script src="./config.js"></script>
+
     <!-- API Layer -->
     <script type="text/babel" src="./api/healthService.js"></script>
 
-    <!-- Data -->
+    <!-- Data & Utilities -->
     <script type="text/babel" src="./data/metrics.js"></script>
-
-    <!-- Utilities -->
-    <script type="text/babel" src="./utils/simulation.js"></script>
 
     <!-- Components -->
     <script type="text/babel" src="./components/ServiceHealthCard.js"></script>
@@ -85,105 +85,119 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Main Monitoring Dashboard Component
+        // Main Monitoring Dashboard Component - REAL DATA ONLY
         function MonitoringDashboard() {
             const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleTimeString());
             const [rollingAverage, setRollingAverage] = useState({ orderService: 0, inventoryService: 0 });
-            const [servicesStatus, setServicesStatus] = useState(SERVICES_STATUS);
-            const [responseTimeHistory, setResponseTimeHistory] = useState(RESPONSE_TIME_HISTORY);
-            const [activityLog, setActivityLog] = useState(ACTIVITY_LOG);
-            const [failureStats, setFailureStats] = useState(FAILURE_STATS.last24Hours);
+            const [servicesStatus, setServicesStatus] = useState(initializeServicesStatus());
+            const [responseTimeHistory, setResponseTimeHistory] = useState(initializeResponseTimeHistory(30));
+            const [activityLog, setActivityLog] = useState(initializeActivityLog());
+            const [failureStats, setFailureStats] = useState(initializeFailureStats());
 
-            // Update response time data every 2 seconds
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setResponseTimeHistory(prevHistory => {
-                        // Generate new response times
-                        const newOrderTime = generateResponseTime(145, 0.05);
-                        const newInventoryTime = generateResponseTime(180, 0.15); // Higher spike chance
-
-                        const newDataPoint = {
-                            timestamp: Date.now(),
-                            orderService: newOrderTime,
-                            inventoryService: newInventoryTime
-                        };
-
-                        // Keep only last 30 data points
-                        const updatedHistory = [...prevHistory.slice(1), newDataPoint];
-
-                        // Calculate new rolling average
-                        setRollingAverage(calculateRollingAverage(updatedHistory));
-
-                        return updatedHistory;
+            // Fetch real health data from services
+            const fetchServiceHealth = async (endpoint, serviceName) => {
+                const startTime = Date.now();
+                try {
+                    const response = await fetch(endpoint + '/health', {
+                        signal: AbortSignal.timeout(window.DASHBOARD_CONFIG?.HEALTH_CHECK_TIMEOUT || 3000)
                     });
+                    const responseTime = Date.now() - startTime;
+                    const data = await response.json();
 
-                    setLastUpdate(new Date().toLocaleTimeString());
-                }, 2000);
+                    return {
+                        name: serviceName,
+                        status: determineServiceStatus(response, data),
+                        responseTime,
+                        uptime: data.uptime || 99.0,
+                        lastCheck: new Date().toISOString(),
+                        endpoint,
+                        database: data.database || data.Database || 'unknown',
+                        message: data.message || data.Message || '',
+                        service: data.service || serviceName
+                    };
+                } catch (error) {
+                    const responseTime = Date.now() - startTime;
+                    return {
+                        name: serviceName,
+                        status: 'down',
+                        responseTime,
+                        uptime: 0,
+                        lastCheck: new Date().toISOString(),
+                        endpoint,
+                        database: 'disconnected',
+                        message: error.message || 'Service unreachable'
+                    };
+                }
+            };
 
-                return () => clearInterval(interval);
-            }, []);
+            // Update all services health
+            const updateServicesHealth = async () => {
+                const config = window.DASHBOARD_CONFIG || {};
+                const [orderData, inventoryData, authData] = await Promise.all([
+                    fetchServiceHealth(config.ENDPOINTS?.ORDERS || '/api/orders', 'Order Service'),
+                    fetchServiceHealth(config.ENDPOINTS?.INVENTORY || '/api/inventory', 'Inventory Service'),
+                    fetchServiceHealth(config.ENDPOINTS?.AUTH || '/api/auth', 'Auth Service')
+                ]);
 
-            // Update service status every 10 seconds
+                setServicesStatus({
+                    orderService: orderData,
+                    inventoryService: inventoryData,
+                    authService: authData
+                });
+
+                // Update response time history
+                setResponseTimeHistory(prev => {
+                    const newDataPoint = {
+                        timestamp: Date.now(),
+                        orderService: orderData.responseTime,
+                        inventoryService: inventoryData.responseTime
+                    };
+                    const updated = [...prev.slice(1), newDataPoint];
+                    setRollingAverage(calculateRollingAverage(updated));
+                    return updated;
+                });
+
+                // Update failure stats
+                setFailureStats(prev => {
+                    let stats = updateFailureStatsWithRequest(prev, orderData.status === 'healthy', false);
+                    stats = updateFailureStatsWithRequest(stats, inventoryData.status === 'healthy', false);
+                    return stats;
+                });
+
+                // Add activity log for status changes
+                if (orderData.status === 'degraded' || orderData.status === 'down') {
+                    setActivityLog(prev => addActivityLogEntry(
+                        prev,
+                        'Order Service',
+                        orderData.status === 'down' ? 'error' : 'warning',
+                        `Service ${orderData.status}`,
+                        orderData.message
+                    ));
+                }
+                if (inventoryData.status === 'degraded' || inventoryData.status === 'down') {
+                    setActivityLog(prev => addActivityLogEntry(
+                        prev,
+                        'Inventory Service',
+                        inventoryData.status === 'down' ? 'error' : 'warning',
+                        `Service ${inventoryData.status}`,
+                        inventoryData.message
+                    ));
+                }
+
+                setLastUpdate(new Date().toLocaleTimeString());
+            };
+
+            // Initial fetch and periodic updates
             useEffect(() => {
+                updateServicesHealth(); // Initial fetch
+
                 const interval = setInterval(() => {
-                    setServicesStatus(prevStatus => {
-                        const newStatus = { ...prevStatus };
-
-                        // Simulate status changes for each service
-                        Object.keys(newStatus).forEach(serviceKey => {
-                            const service = newStatus[serviceKey];
-                            service.status = simulateServiceStatus(service.status, service.uptime);
-                            service.lastCheck = new Date().toISOString();
-
-                            // Update response time based on status
-                            if (service.status === 'healthy') {
-                                if (serviceKey === 'orderService') {
-                                    service.responseTime = generateResponseTime(145, 0.05);
-                                } else if (serviceKey === 'inventoryService') {
-                                    service.responseTime = generateResponseTime(180, 0.1);
-                                } else {
-                                    service.responseTime = generateResponseTime(8, 0);
-                                }
-                            } else if (service.status === 'degraded') {
-                                service.responseTime = Math.floor(Math.random() * 1500) + 1000;
-                            } else {
-                                service.responseTime = 0;
-                            }
-                        });
-
-                        return newStatus;
-                    });
-                }, 10000);
+                    updateServicesHealth();
+                }, window.DASHBOARD_CONFIG?.HEALTH_CHECK_INTERVAL || 10000);
 
                 return () => clearInterval(interval);
             }, []);
 
-            // Add new activity log entries every 15 seconds
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setActivityLog(prevLog => {
-                        const newEntry = generateActivityLogEntry(servicesStatus);
-                        // Keep only last 20 entries
-                        return [newEntry, ...prevLog.slice(0, 19)];
-                    });
-                }, 15000);
-
-                return () => clearInterval(interval);
-            }, [servicesStatus]);
-
-            // Update failure statistics every 5 seconds
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setFailureStats(prevStats => updateFailureStats(prevStats));
-                }, 5000);
-
-                return () => clearInterval(interval);
-            }, []);
-
-            // Initial calculation
-            useEffect(() => {
-                setRollingAverage(calculateRollingAverage(responseTimeHistory));
-            }, []);
 
             return (
                 <div className="min-h-screen bg-gray-50">
@@ -223,7 +237,7 @@
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <ServiceHealthCard data={servicesStatus.orderService} />
                                 <ServiceHealthCard data={servicesStatus.inventoryService} />
-                                <ServiceHealthCard data={servicesStatus.database} />
+                                <ServiceHealthCard data={servicesStatus.authService} />
                             </div>
                         </div>
 
