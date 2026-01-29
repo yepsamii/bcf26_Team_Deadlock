@@ -18,4 +18,4 @@ spec:
       - name: frontend
         image: asifmahmoud414/bcf26-frontend:latest
         ports:
-        - containerPort: 3000
+        - containerPort: 80
