@@ -1,0 +1,14 @@
+---
+- hosts: master
+  roles:
+    - common
+    - master
+
+- hosts: worker
+  roles:
+    - common
+    - worker
+
+- hosts: database
+  roles:
+    - database

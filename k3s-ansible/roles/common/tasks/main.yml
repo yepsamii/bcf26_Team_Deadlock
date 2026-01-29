@@ -1,0 +1,14 @@
+---
+- name: Update and upgrade the system
+  apt:
+    update_cache: yes
+    upgrade: dist
+  become: true
+
+- name: Install dependencies
+  apt:
+    name:
+      - curl
+      - apt-transport-https
+    state: present
+  become: true

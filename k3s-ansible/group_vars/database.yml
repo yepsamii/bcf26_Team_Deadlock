@@ -1,0 +1,7 @@
+---
+# PostgreSQL configuration
+postgres_password: "postgres123"
+
+# MongoDB configuration
+mongodb_admin_user: "admin"
+mongodb_admin_password: "mongo123"

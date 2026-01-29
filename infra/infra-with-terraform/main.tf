@@ -1,6 +1,22 @@
 # Configure AWS Provider
 provider "aws" {
-  region = "us-east-2"
+  region = "ap-southeast-1"
+}
+
+# Get latest Ubuntu 22.04 AMI
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 }
 
 # Create VPC
@@ -19,7 +35,7 @@ resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.bcf_26.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-2a"
+  availability_zone       = "ap-southeast-1a"
 
   tags = {
     Name = "bcf_26_public_subnet"
@@ -136,24 +152,11 @@ resource "aws_security_group" "instance_sg" {
   }
 }
 
-# Create Nginx Proxy Instance (t3.small)
-resource "aws_instance" "nginx_proxy" {
-  ami                    = "ami-0ea3c35c5c3284d82"
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.public_subnet.id
-  key_name              = "bcf26"
-  vpc_security_group_ids = [aws_security_group.instance_sg.id]
-
-  tags = {
-    Name = "nginx-proxy"
-  }
-}
-
 # Create Kubernetes Cluster Instances (t3.medium)
 resource "aws_instance" "k8s_instances" {
   count = 3
 
-  ami                    = "ami-0ea3c35c5c3284d82"
+  ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.small"
   subnet_id              = aws_subnet.public_subnet.id
   key_name              = "bcf26"
@@ -207,7 +210,7 @@ resource "aws_security_group" "database_sg" {
 
 # Create Database Instance
 resource "aws_instance" "database" {
-  ami                    = "ami-0ea3c35c5c3284d82"
+  ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.small"
   subnet_id              = aws_subnet.public_subnet.id
   key_name               = "bcf26"

@@ -1,0 +1,12 @@
+---
+- name: Restart PostgreSQL
+  systemd:
+    name: postgresql
+    state: restarted
+  become: true
+
+- name: Restart MongoDB
+  systemd:
+    name: mongod
+    state: restarted
+  become: true

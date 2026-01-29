@@ -1,0 +1,13 @@
+[master]
+master-node ansible_host=13.212.182.34 private_ip=10.0.1.86
+
+[worker]
+worker-node-1 ansible_host=13.212.204.110 private_ip=10.0.1.190
+worker-node-2 ansible_host=13.229.45.132 private_ip=10.0.1.60
+
+[database]
+database-node ansible_host=47.128.225.20
+
+[k3s_cluster:children]
+master
+worker

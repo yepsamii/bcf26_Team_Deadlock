@@ -1,0 +1,19 @@
+---
+- name: Install K3s master
+  shell: |
+    curl -sfL https://get.k3s.io | sh -s - server \
+      --node-external-ip {{ ansible_host }} \
+      --node-ip {{ private_ip }} \
+      --advertise-address {{ private_ip }} \
+      --tls-san {{ ansible_host }} \
+      --tls-san {{ private_ip }}
+  become: true
+
+- name: Fetch K3s token
+  shell: cat /var/lib/rancher/k3s/server/node-token
+  register: k3s_token
+  become: true
+
+- name: Save token for workers
+  set_fact:
+    k3s_token: "{{ k3s_token.stdout }}"
