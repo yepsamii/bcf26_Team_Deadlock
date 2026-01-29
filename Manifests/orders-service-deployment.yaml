@@ -1,0 +1,24 @@
+---
+# Deployment for orders-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-service
+  template:
+    metadata:
+      labels:
+        app: orders-service
+    spec:
+      containers:
+      - name: orders-service
+        image: asifmahmoud414/bcf26-orders-service:latest
+        envFrom:
+        - configMapRef:
+            name: orders-service-config
+        ports:
+        - containerPort: 5003

@@ -18,6 +18,7 @@ RUN go mod download
 # Copy the entire application source
 COPY . .
 
+
 # Build the Go binary
 RUN go build -o /app .
 

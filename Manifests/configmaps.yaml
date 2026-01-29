@@ -7,6 +7,8 @@ metadata:
 data:
   PORT: "5000"
   AUTH_SERVICE_URL: "http://auth-service:5001"
+  INVENTORY_SERVICE_URL: "http://inventory-service:5002"
+  ORDER_SERVICE_URL: "http://orders-service:5003"
 ---
 # ConfigMap for auth-service
 apiVersion: v1
@@ -31,3 +33,12 @@ data:
   OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
   LOG_STYLE: "json"
   LOG_LEVEL: "debug"
+---
+# ConfigMap for orders-service
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-service-config
+data:
+  PORT: "5003"
+  DBSTRING: "postgresql://postgres:postgres123@47.128.225.20:5432"

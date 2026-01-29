@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
 const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || 'http://localhost:5002';
+const ORDER_SERVICE_URL = process.env.ORDER_SERVICE_URL || 'http://localhost:5003';
 
 app.use(cors());
 
@@ -17,7 +18,7 @@ const authServiceProxy = createProxyMiddleware({
     target: AUTH_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-        '^/auth': ''
+        '^/api/auth': ''
     }
 });
 
@@ -26,22 +27,25 @@ const inventoryServiceProxy = createProxyMiddleware({
     target: INVENTORY_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-        '^/inventory': ''
+        '^/api/inventory': ''
     }
 });
 
-// Products proxy (direct access to inventory service products endpoint)
-const productsServiceProxy = createProxyMiddleware({
-    target: INVENTORY_SERVICE_URL,
+// Orders service proxy
+const ordersServiceProxy = createProxyMiddleware({
+    target: ORDER_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+        '^/api/orders': ''
+    }
 });
 
 
 // Routes
-app.use('/auth', authServiceProxy);
-app.use('/inventory', inventoryServiceProxy);
-app.use('/products', productsServiceProxy);
-app.get('/health', (req, res) => {
+app.use('/api/auth', authServiceProxy);
+app.use('/api/inventory', inventoryServiceProxy);
+app.use('/api/orders', authMiddleware, ordersServiceProxy);
+app.get('/api/health', (req, res) => {
     res.json({ message: "API Gateway is running !!" });
 });
 
