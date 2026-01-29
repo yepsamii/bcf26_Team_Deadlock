@@ -1,18 +1,33 @@
-FROM node:20-alpine
+FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy package.json and package-lock.json to the working directory
+COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
 
+# Copy Nginx file
+COPY nginx.conf ./
+
 # Copy application files
 COPY . .
 
-# Expose port
-EXPOSE 3000
+# Build the React app for production
+RUN npm run build
 
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Use Nginx as the production server
+FROM nginx:alpine
+
+# Copy the built React app to Nginx's web server directory
+COPY --from=build /app/dist /usr/share/nginx/html
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 80 for the Nginx server
+EXPOSE 80
+
+
+# Start Nginx when the container runs
+CMD ["nginx", "-g", "daemon off;"]
