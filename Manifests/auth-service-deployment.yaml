@@ -1,0 +1,24 @@
+---
+# Deployment for auth-service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: asifmahmoud414/bcf26-auth-service:latest
+        envFrom:
+        - configMapRef:
+            name: auth-service-config
+        ports:
+        - containerPort: 5001

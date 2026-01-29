@@ -1,0 +1,65 @@
+name: Auth Service CI/CD
+on:
+  push:
+    branches:
+      - main
+      - ci/cd
+    paths:
+      - services/auth/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - services/auth/**
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./services/auth
+          push: true
+          tags: asifmahmoud414/bcf26-auth-service:${{ github.run_number }}
+      
+      - name: Logout from Docker Hub
+        run: docker logout
+
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.MASTER_IP }} >> ~/.ssh/known_hosts
+      
+      - name: Update Kubernetes deployment image
+        run: |
+          sed -i "s|image: asifmahmoud414/bcf26-auth-service:.*|image: asifmahmoud414/bcf26-auth-service:${{ github.run_number }}|" Manifests/auth-service-deployment.yaml
+
+      - name: Copy manifest files to Kubernetes master node
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ubuntu@${{ secrets.MASTER_IP }} "mkdir -p /home/ubuntu/Manifests"
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/configmaps.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/auth-service-deployment.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no Manifests/services.yaml ubuntu@${{ secrets.MASTER_IP }}:/home/ubuntu/Manifests/
+
+      - name: Deploy to Kubernetes
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ubuntu@${{ secrets.MASTER_IP }} "cd /home/ubuntu/Manifests && \
+          sudo kubectl apply -f ."
+      
+      - name: Verify Deployment
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ubuntu@${{ secrets.MASTER_IP }} "sudo kubectl get pods"

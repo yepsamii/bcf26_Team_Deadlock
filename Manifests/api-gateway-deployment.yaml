@@ -1,0 +1,24 @@
+---
+# Deployment for api-gateway
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: asifmahmoud414/bcf26-api-gateway:latest
+        envFrom:
+        - configMapRef:
+            name: api-gateway-config
+        ports:
+        - containerPort: 5000
