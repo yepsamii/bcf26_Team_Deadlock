@@ -2,17 +2,23 @@ import { useCart } from '../../contexts/CartContext';
 import { CartItem } from './CartItem';
 import { useReserveProduct } from '../../hooks/useInventory';
 import { useState } from 'react';
+import { PaymentModal } from '../payment/PaymentModal';
 
 export const CartDrawer = () => {
   const { cartItems, isCartOpen, setIsCartOpen, getCartTotal, clearCart } = useCart();
   const reserveProductMutation = useReserveProduct();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cartItems.length === 0) return;
+    setShowPaymentModal(true);
+  };
 
+  const handlePaymentSuccess = async (paymentResult) => {
     setIsCheckingOut(true);
     try {
+      // Reserve products after successful payment
       for (const item of cartItems) {
         await reserveProductMutation.mutateAsync({
           productId: item.id,
@@ -20,10 +26,10 @@ export const CartDrawer = () => {
         });
       }
       clearCart();
-      alert('Order placed successfully!');
+      setShowPaymentModal(false);
     } catch (error) {
-      console.error('Checkout failed:', error);
-      alert('Failed to complete order. Some items may be out of stock.');
+      console.error('Failed to reserve products:', error);
+      alert('Payment successful but failed to reserve products. Please contact support.');
     } finally {
       setIsCheckingOut(false);
     }
@@ -135,6 +141,14 @@ export const CartDrawer = () => {
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={getCartTotal()}
+        onSuccess={handlePaymentSuccess}
+      />
     </>
   );
 };

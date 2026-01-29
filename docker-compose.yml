@@ -52,6 +52,21 @@ services:
     networks:
       - deadlock-network
 
+  payment-service:
+    build: ./services/payment
+    container_name: payment-service
+    environment:
+      PORT: 5004
+      DBSTRING: postgresql://postgres:postgres123@47.128.225.20:5432
+    ports:
+      - "5004:5004"
+    depends_on:
+      - otel-collector
+      - prometheus
+      - loki
+    networks:
+      - deadlock-network
+
   api-gateway:
     build:
       context: ./services/api-gateway
@@ -62,10 +77,12 @@ services:
       - AUTH_SERVICE_URL=http://auth-service:5001
       - INVENTORY_SERVICE_URL=http://inventory-service:5002
       - ORDER_SERVICE_URL=http://orders-service:5003
+      - PAYMENT_SERVICE_URL=http://payment-service:5004
     depends_on:
       - auth-service
       - inventory-service
       - orders-service
+      - payment-service
       - prometheus
       - loki
     ports:

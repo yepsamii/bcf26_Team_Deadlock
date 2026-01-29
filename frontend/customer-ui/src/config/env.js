@@ -10,6 +10,7 @@ export const config = {
   authServiceURL: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8000',
   orderServiceURL: import.meta.env.VITE_ORDER_SERVICE_URL || 'http://localhost:8000',
   inventoryServiceURL: import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:8000',
+  paymentServiceURL: import.meta.env.VITE_PAYMENT_SERVICE_URL || 'http://localhost:8000/api/payments',
 
   // Feature Flags
   useMockData: import.meta.env.VITE_USE_MOCK_DATA === 'true',
@@ -43,11 +44,19 @@ export const endpoints = {
     health: '/health',
   },
 
+  // Payment Service
+  payments: {
+    process: '/payments',
+    getById: (id) => `/payments/${id}`,
+    getByOrderId: (orderId) => `/payments/order/${orderId}`,
+  },
+
   // Health Checks
   health: {
     authService: '/health',
     orderService: '/health',
     inventoryService: '/health',
+    paymentService: '/health',
   },
 };
 

@@ -11,3 +11,8 @@ scrape_configs:
     static_configs:
       - targets: ['auth-service:5001']
     metrics_path: /metrics
+
+  - job_name: 'payment-service'
+    static_configs:
+      - targets: ['payment-service:5004']
+    metrics_path: /metrics

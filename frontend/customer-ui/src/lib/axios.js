@@ -35,6 +35,17 @@ export const inventoryServiceClient = axios.create({
 });
 
 /**
+ * Create axios instance for Payment Service
+ */
+export const paymentServiceClient = axios.create({
+  baseURL: config.paymentServiceURL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+/**
  * Request interceptor - Add auth token and simulate delay
  */
 const requestInterceptor = async (config) => {
@@ -83,7 +94,7 @@ const errorInterceptor = (error) => {
 };
 
 // Apply interceptors to all clients
-[authServiceClient, orderServiceClient, inventoryServiceClient].forEach((client) => {
+[authServiceClient, orderServiceClient, inventoryServiceClient, paymentServiceClient].forEach((client) => {
   client.interceptors.request.use(requestInterceptor);
   client.interceptors.response.use(responseInterceptor, errorInterceptor);
 });
