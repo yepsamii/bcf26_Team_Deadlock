@@ -45,7 +45,7 @@ const ordersHealthCheckProxy = createProxyMiddleware({
     target: ORDER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {
-        '^/api/orders/health': '/health'
+        '^/.*': '/health'  // Express strips the mount path, so we match anything and rewrite to /health
     }
 });
 
