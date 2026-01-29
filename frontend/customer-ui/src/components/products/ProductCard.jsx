@@ -19,97 +19,117 @@ export const ProductCard = ({ product }) => {
   const maxQuantity = Math.min(product.available_quantity, 10);
   const isLowStock = product.available_quantity > 0 && product.available_quantity <= 5;
 
+  const handleIncrement = () => {
+    if (quantity < maxQuantity) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-primary-200 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
       {/* Product Image */}
-      <div className="relative h-48 bg-gradient-to-br from-primary-100 via-primary-200 to-primary-300 flex items-center justify-center overflow-hidden">
-        <div className="text-6xl font-bold text-white opacity-80">
+      <div className="relative h-56 bg-gradient-to-br from-primary-50 via-primary-100 to-primary-200 flex items-center justify-center overflow-hidden">
+        <div className="text-7xl font-bold text-primary-300 group-hover:scale-110 transition-transform duration-300">
           {product.title.charAt(0)}
         </div>
 
         {/* Stock Badge */}
         {isOutOfStock ? (
-          <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+          <div className="absolute top-4 right-4 bg-red-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
             Out of Stock
           </div>
         ) : isLowStock ? (
-          <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+          <div className="absolute top-4 right-4 bg-orange-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
             Low Stock
           </div>
         ) : (
-          <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+          <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
             In Stock
           </div>
         )}
 
         {/* Success Badge */}
         {showSuccess && (
-          <div className="absolute inset-0 bg-green-500 bg-opacity-90 flex items-center justify-center">
+          <div className="absolute inset-0 bg-emerald-500/95 backdrop-blur-sm flex items-center justify-center animate-in fade-in zoom-in duration-300">
             <div className="text-white text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 mx-auto mb-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <p className="font-semibold">Added to Cart!</p>
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <p className="font-bold text-lg">Added to Cart!</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Product Details */}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 min-h-[3.5rem]">
           {product.title}
         </h3>
 
-        {/* Price */}
-        <div className="mb-4">
-          <p className="text-3xl font-bold text-primary-600">
+        {/* Price & Stock */}
+        <div className="flex items-baseline justify-between mb-6">
+          <div className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
             ${product.price.toFixed(2)}
-          </p>
-        </div>
-
-        {/* Stock Info */}
-        <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-600">Available:</span>
-            <span className={`font-semibold ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-orange-600' : 'text-green-600'}`}>
-              {product.available_quantity} units
-            </span>
+          </div>
+          <div className="text-sm font-medium text-gray-500">
+            {product.available_quantity} available
           </div>
         </div>
 
         {/* Add to Cart */}
         {!isOutOfStock ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">Qty:</label>
-              <select
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+          <div className="space-y-4">
+            {/* Quantity Selector */}
+            <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-xl p-2">
+              <button
+                onClick={handleDecrement}
+                disabled={quantity <= 1}
+                className="w-10 h-10 rounded-lg bg-white border border-gray-200 hover:border-primary-300 hover:bg-primary-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm hover:shadow"
               >
-                {[...Array(maxQuantity)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
-                  </option>
-                ))}
-              </select>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              <div className="w-16 text-center">
+                <div className="text-2xl font-bold text-gray-900">{quantity}</div>
+                <div className="text-xs text-gray-500 font-medium">Qty</div>
+              </div>
+
+              <button
+                onClick={handleIncrement}
+                disabled={quantity >= maxQuantity}
+                className="w-10 h-10 rounded-lg bg-white border border-gray-200 hover:border-primary-300 hover:bg-primary-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center shadow-sm hover:shadow"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+              </button>
             </div>
 
             <button
               onClick={handleAddToCart}
-              className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 active:bg-primary-800 transition-colors flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+              className="w-full bg-gradient-to-r from-primary-600 to-primary-700 text-white py-3.5 rounded-xl font-semibold hover:from-primary-700 hover:to-primary-800 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -117,11 +137,11 @@ export const ProductCard = ({ product }) => {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                strokeWidth={2}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                 />
               </svg>
@@ -129,8 +149,8 @@ export const ProductCard = ({ product }) => {
             </button>
           </div>
         ) : (
-          <div className="text-center py-3 bg-red-50 rounded-lg border border-red-200">
-            <span className="text-red-700 font-semibold text-sm">Currently Unavailable</span>
+          <div className="text-center py-4 bg-red-50 rounded-xl border border-red-100">
+            <span className="text-red-600 font-semibold">Currently Unavailable</span>
           </div>
         )}
       </div>
