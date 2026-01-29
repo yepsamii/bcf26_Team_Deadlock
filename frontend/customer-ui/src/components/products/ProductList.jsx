@@ -34,12 +34,12 @@ export const ProductList = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Available Products</h2>
-        <p className="text-gray-600 mt-1">Browse and reserve products from our inventory</p>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900">Available Products</h2>
+        <p className="text-gray-600 mt-2">Browse our inventory and add items to your cart</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
