@@ -44,5 +44,3 @@ build/
 *.pem
 *.key
 secrets/
-
-go.sum
