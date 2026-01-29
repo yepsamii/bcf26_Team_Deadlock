@@ -6,12 +6,16 @@
  */
 
 // API Configuration
+// Configuration is loaded from config.js (window.DASHBOARD_CONFIG)
+// Fallback to defaults if not available
 const MONITORING_CONFIG = {
-    ORDER_SERVICE_URL: 'http://localhost:3001',
-    INVENTORY_SERVICE_URL: 'http://localhost:3002',
-    DATABASE_URL: 'postgresql://localhost:5432/valerix',
-    USE_MOCK_DATA: true,
-    HEALTH_CHECK_TIMEOUT: 3000, // 3 seconds
+    ORDER_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.ORDERS || window.location.origin + '/api/orders',
+    INVENTORY_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.INVENTORY || window.location.origin + '/api/inventory',
+    AUTH_SERVICE_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.AUTH || window.location.origin + '/api/auth',
+    API_GATEWAY_URL: window.DASHBOARD_CONFIG?.ENDPOINTS?.GATEWAY || window.location.origin + '/api/gateway',
+    DATABASE_URL: window.DASHBOARD_CONFIG?.DATABASE_URL || 'postgresql://postgres:postgres123@47.128.225.20:5432/postgres',
+    USE_MOCK_DATA: window.DASHBOARD_CONFIG?.USE_MOCK_DATA ?? true,
+    HEALTH_CHECK_TIMEOUT: window.DASHBOARD_CONFIG?.HEALTH_CHECK_TIMEOUT || 3000,
 };
 
 class HealthService {
@@ -239,9 +243,10 @@ class HealthService {
      */
     _getEndpoint(serviceName) {
         const endpointMap = {
-            'Order Service': 'http://localhost:3001/api/orders',
-            'Inventory Service': 'http://localhost:3002/api/inventory',
-            'Database': 'postgresql://localhost:5432/valerix',
+            'Order Service': 'http://localhost:5003',
+            'Inventory Service': 'http://localhost:5002',
+            'Auth Service': 'http://localhost:5001',
+            'Database': 'postgresql://postgres:postgres123@47.128.225.20:5432/postgres',
         };
         return endpointMap[serviceName] || 'unknown';
     }
