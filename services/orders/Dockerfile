@@ -15,8 +15,9 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy the entire application source
+# Copy the entire application sourc
 COPY . .
+
 
 # Build the Go binary
 RUN go build -o /app .

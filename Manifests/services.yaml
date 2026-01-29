@@ -37,3 +37,29 @@ spec:
     - protocol: TCP
       port: 5002
       targetPort: 5002
+---
+# Service for orders-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-service
+spec:
+  selector:
+    app: orders-service
+  ports:
+    - protocol: TCP
+      port: 5003
+      targetPort: 5003
+---
+# Service for frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

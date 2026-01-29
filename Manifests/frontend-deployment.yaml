@@ -1,0 +1,21 @@
+---
+# Deployment for frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: asifmahmoud414/bcf26-frontend:latest
+        ports:
+        - containerPort: 3000
