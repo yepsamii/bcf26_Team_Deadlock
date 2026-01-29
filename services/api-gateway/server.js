@@ -29,7 +29,7 @@ const inventoryServiceProxy = createProxyMiddleware({
 app.use('/auth', authServiceProxy);
 app.use('/inventory', authMiddleware, inventoryServiceProxy);
 app.get('/health', (req, res) => {
-    res.json({ message: "API Gateway is running !!" });
+    res.json({ message: "API Gateway is running properly!!" });
 });
 
 app.listen(PORT, () => {
