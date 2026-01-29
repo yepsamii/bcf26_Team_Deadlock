@@ -204,7 +204,7 @@
                         orderData.status === 'down' ? 'Service down' : 'Service degraded',
                         orderData.message
                     ));
-                } else if (orderData.status === 'healthy' && prev => prev.length > 0) {
+                } else if (orderData.status === 'healthy') {
                     // Log recovery
                     setActivityLog(prev => {
                         const lastLog = prev[0];
@@ -334,11 +334,13 @@
                                     averageTime={rollingAverage.orderService}
                                     serviceName="Order Service"
                                     threshold={1000}
+                                    serviceStatus={servicesStatus.orderService.status}
                                 />
                                 <ResponseTimeIndicator
                                     averageTime={rollingAverage.inventoryService}
                                     serviceName="Inventory Service"
                                     threshold={1000}
+                                    serviceStatus={servicesStatus.inventoryService.status}
                                 />
                             </div>
                         </div>

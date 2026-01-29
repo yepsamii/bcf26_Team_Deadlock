@@ -1,6 +1,7 @@
 // Response Time Indicator Component
-function ResponseTimeIndicator({ averageTime, serviceName, threshold = 1000 }) {
-    const isAlert = averageTime > threshold;
+function ResponseTimeIndicator({ averageTime, serviceName, threshold = 1000, serviceStatus = 'healthy' }) {
+    // Alert if service is down/degraded OR response time exceeds threshold
+    const isAlert = serviceStatus !== 'healthy' || averageTime > threshold;
 
     return (
         <div className={`rounded-xl p-6 transition-all duration-500 ${
@@ -31,7 +32,7 @@ function ResponseTimeIndicator({ averageTime, serviceName, threshold = 1000 }) {
                 <div className={`px-3 py-1 rounded-full text-xs font-bold ${
                     isAlert ? 'bg-red-900/50 text-white' : 'bg-green-900/50 text-white'
                 }`}>
-                    {isAlert ? 'ALERT' : 'HEALTHY'}
+                    {serviceStatus === 'down' ? 'DOWN' : serviceStatus === 'degraded' ? 'DEGRADED' : isAlert ? 'ALERT' : 'HEALTHY'}
                 </div>
             </div>
 
@@ -59,9 +60,16 @@ function ResponseTimeIndicator({ averageTime, serviceName, threshold = 1000 }) {
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                     <div>
-                        <p className="text-white text-xs font-medium">Performance Degradation Detected</p>
+                        <p className="text-white text-xs font-medium">
+                            {serviceStatus === 'down' ? 'Service Unavailable' : serviceStatus === 'degraded' ? 'Service Degraded' : 'Performance Degradation Detected'}
+                        </p>
                         <p className="text-white/80 text-xs mt-1">
-                            Response time exceeds {threshold}ms threshold. Investigate for potential issues.
+                            {serviceStatus === 'down'
+                                ? 'Service is not responding to health checks. Immediate attention required.'
+                                : serviceStatus === 'degraded'
+                                ? 'Service is experiencing issues. Performance may be impacted.'
+                                : `Response time exceeds ${threshold}ms threshold. Investigate for potential issues.`
+                            }
                         </p>
                     </div>
                 </div>

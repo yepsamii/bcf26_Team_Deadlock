@@ -55,7 +55,6 @@ function ServiceHealthCard({ data }) {
                     </div>
                     <div>
                         <h3 className="text-lg font-semibold text-gray-900">{data.name}</h3>
-                        <p className="text-xs text-gray-500">{data.endpoint}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
