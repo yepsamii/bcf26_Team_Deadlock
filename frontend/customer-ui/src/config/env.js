@@ -7,9 +7,9 @@
 
 export const config = {
   // API URLs
-  authServiceURL: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:5001',
-  orderServiceURL: import.meta.env.VITE_ORDER_SERVICE_URL || 'http://localhost:3001',
-  inventoryServiceURL: import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:3002',
+  authServiceURL: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:8000',
+  orderServiceURL: import.meta.env.VITE_ORDER_SERVICE_URL || 'http://localhost:8000',
+  inventoryServiceURL: import.meta.env.VITE_INVENTORY_SERVICE_URL || 'http://localhost:8000',
 
   // Feature Flags
   useMockData: import.meta.env.VITE_USE_MOCK_DATA === 'true',
@@ -36,11 +36,11 @@ export const endpoints = {
 
   // Inventory Service
   inventory: {
-    list: '/api/inventory',
-    getById: (id) => `/api/inventory/${id}`,
-    checkStock: (id) => `/api/inventory/${id}/stock`,
-    reserveStock: '/api/inventory/reserve',
-    releaseStock: '/api/inventory/release',
+    list: '/products',
+    getById: (id) => `/products/${id}`,
+    reserve: (id) => `/products/${id}/reserve`,
+    release: (id) => `/products/${id}/release`,
+    health: '/health',
   },
 
   // Health Checks

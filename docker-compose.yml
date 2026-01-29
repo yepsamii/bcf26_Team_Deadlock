@@ -59,6 +59,25 @@ services:
     networks:
       - deadlock-network
 
+  customer-ui:
+    build:
+      context: ./frontend/customer-ui
+      dockerfile: Dockerfile
+    container_name: customer-ui
+    environment:
+      - VITE_AUTH_SERVICE_URL=http://localhost:8000
+      - VITE_INVENTORY_SERVICE_URL=http://localhost:8000
+      - VITE_ORDER_SERVICE_URL=http://localhost:8000
+    depends_on:
+      - api-gateway
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/customer-ui:/app
+      - /app/node_modules
+    networks:
+      - deadlock-network
+
 
 
   # Monitoring Services

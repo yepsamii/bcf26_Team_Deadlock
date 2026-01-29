@@ -6,8 +6,8 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001/api/auth';
-const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || 'http://localhost:5002/api/v1/inventory';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:5001';
+const INVENTORY_SERVICE_URL = process.env.INVENTORY_SERVICE_URL || 'http://localhost:5002';
 
 app.use(cors());
 
@@ -16,10 +16,22 @@ app.use(cors());
 const authServiceProxy = createProxyMiddleware({
     target: AUTH_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+        '^/auth': ''
+    }
 });
 
 // Inventory service proxy
 const inventoryServiceProxy = createProxyMiddleware({
+    target: INVENTORY_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {
+        '^/inventory': ''
+    }
+});
+
+// Products proxy (direct access to inventory service products endpoint)
+const productsServiceProxy = createProxyMiddleware({
     target: INVENTORY_SERVICE_URL,
     changeOrigin: true,
 });
@@ -27,7 +39,8 @@ const inventoryServiceProxy = createProxyMiddleware({
 
 // Routes
 app.use('/auth', authServiceProxy);
-app.use('/inventory', authMiddleware, inventoryServiceProxy);
+app.use('/inventory', inventoryServiceProxy);
+app.use('/products', productsServiceProxy);
 app.get('/health', (req, res) => {
     res.json({ message: "API Gateway is running !!" });
 });

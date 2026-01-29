@@ -1,9 +1,12 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { useLogout } from '../../hooks/useAuth';
+import { useProducts } from '../../hooks/useInventory';
+import { ProductList } from '../products/ProductList';
 
 export const Dashboard = () => {
   const { user } = useAuth();
   const logout = useLogout();
+  const { data: products } = useProducts();
 
   const handleLogout = () => {
     logout();
@@ -54,8 +57,13 @@ export const Dashboard = () => {
             {/* Stat Card 3 */}
             <div className="p-6 bg-blue-50 rounded-lg border border-blue-100">
               <h3 className="text-sm font-medium text-blue-900 mb-2">Products Available</h3>
-              <p className="text-3xl font-bold text-blue-600">10</p>
+              <p className="text-3xl font-bold text-blue-600">{products?.length || 0}</p>
             </div>
+          </div>
+
+          {/* Products Section */}
+          <div className="mt-8">
+            <ProductList />
           </div>
 
           {/* User Info */}
