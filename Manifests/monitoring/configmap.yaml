@@ -57,7 +57,7 @@ data:
     limits_config:
       retention_period: 24h
 
-  # Promtail config
+  # Promtail config (K3s/containerd uses /var/log/pods)
   promtail.yaml: |
     server:
       http_listen_port: 9080
@@ -66,31 +66,31 @@ data:
     clients:
       - url: http://loki.monitoring:3100/loki/api/v1/push
     scrape_configs:
-      - job_name: containerlogs
+      - job_name: kubernetes-pods
         static_configs:
           - targets:
               - localhost
             labels:
               job: containerlogs
-              __path__: /var/lib/docker/containers/*/*log
+              __path__: /var/log/pods/*/*/*.log
 
-  # Grafana datasources
+  # Grafana datasources (use .monitoring namespace)
   datasources.yaml: |
     apiVersion: 1
     datasources:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus:9090
+        url: http://prometheus.monitoring:9090
         isDefault: true
       - name: Loki
         type: loki
         access: proxy
-        url: http://loki:3100
+        url: http://loki.monitoring:3100
       - name: Jaeger
         type: jaeger
         access: proxy
-        url: http://jaeger:16686
+        url: http://jaeger.monitoring:16686
 
   # Grafana dashboard provider
   dashboards.yaml: |
